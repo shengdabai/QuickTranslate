@@ -1,0 +1,197 @@
+@import "tailwindcss";
+
+:root {
+  --cyan: #00d4ff;
+  --violet: #7c3aed;
+  --bg-base: #0a0e1a;
+  --bg-card: rgba(13, 17, 35, 0.96);
+  --border-glow: rgba(0, 212, 255, 0.25);
+  --border-subtle: rgba(255, 255, 255, 0.07);
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(0, 212, 255, 0.3), 0 0 24px rgba(124, 58, 237, 0.15); }
+  50% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.5), 0 0 40px rgba(124, 58, 237, 0.25); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scan-line {
+  0% { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes border-spin {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+}
+
+body {
+  background: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+::-webkit-scrollbar {
+  width: 3px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 212, 255, 0.3);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 212, 255, 0.5);
+}
+
+[data-tauri-drag-region] {
+  cursor: grab;
+}
+[data-tauri-drag-region]:active {
+  cursor: grabbing;
+}
+
+textarea,
+input[type="text"],
+input[type="password"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #00d4ff 0%, #a78bfa 50%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(0, 212, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.btn-glow {
+  background: linear-gradient(135deg, #00d4ff 0%, #7c3aed 100%);
+  background-size: 200% 200%;
+  animation: border-spin 4s ease infinite;
+  transition: all 0.3s ease;
+}
+
+.btn-glow:hover {
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.4), 0 0 40px rgba(124, 58, 237, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-glow:disabled {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+  transform: none;
+  animation: none;
+}
+
+.btn-glow-loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-glow-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  background-size: 200% 100%;
+  animation: scan-line 1.2s ease-in-out infinite;
+}
+
+.input-dark {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.2s ease;
+}
+
+.input-dark::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.input-dark:focus {
+  outline: none;
+  border-color: rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.2), 0 0 16px rgba(0, 212, 255, 0.1);
+  background: rgba(0, 212, 255, 0.04);
+}
+
+.result-appear {
+  animation: fade-in 0.3s ease forwards;
+}
+
+.divider-glow {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.3), rgba(124, 58, 237, 0.3), transparent);
+}
+
+.copy-btn {
+  background: rgba(0, 212, 255, 0.08);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  color: rgba(0, 212, 255, 0.7);
+  transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+  background: rgba(0, 212, 255, 0.15);
+  border-color: rgba(0, 212, 255, 0.4);
+  color: #00d4ff;
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.2);
+}
+
+.settings-icon-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.4);
+  transition: all 0.2s ease;
+}
+
+.settings-icon-btn:hover {
+  background: rgba(0, 212, 255, 0.1);
+  border-color: rgba(0, 212, 255, 0.3);
+  color: #00d4ff;
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.15);
+}
+
+.card-surface {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+.header-border {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
