@@ -11,9 +11,6 @@
     "global-shortcut:allow-is-registered",
     "store:allow-get",
     "store:allow-set",
-    "store:allow-delete",
-    "store:allow-keys",
-    "store:allow-clear",
     "store:allow-load",
     "store:allow-save"
   ]

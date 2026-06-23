@@ -29,7 +29,7 @@ pub fn run() {
             let quit = MenuItemBuilder::with_id("quit", "退出").build(app)?;
             let menu = MenuBuilder::new(app).items(&[&show, &quit]).build()?;
 
-            let _tray = TrayIconBuilder::new()
+            let _tray_icon = TrayIconBuilder::new()
                 .tooltip("QuickTranslate")
                 .menu(&menu)
                 .on_menu_event(|app, event| match event.id().as_ref() {
@@ -51,7 +51,12 @@ pub fn run() {
 
             #[cfg(desktop)]
             {
-                let shortcut = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyT);
+                #[cfg(target_os = "macos")]
+                let modifier = Modifiers::SUPER | Modifiers::SHIFT;
+                #[cfg(not(target_os = "macos"))]
+                let modifier = Modifiers::CONTROL | Modifiers::SHIFT;
+
+                let shortcut = Shortcut::new(Some(modifier), Code::KeyT);
                 let app_handle = app.handle().clone();
                 app.handle().plugin(
                     tauri_plugin_global_shortcut::Builder::new()

@@ -27,18 +27,31 @@ dist-ssr
 .env
 .env.local
 .env.production
-# Codex governance: local secrets and machine state
-.env
 .env.*
 !.env.example
 !.env.*.example
+
+# Security: secrets and credentials
 *.pem
 *.p12
 *.pfx
 id_rsa
 id_dsa
 .npmrc
-.DS_Store
+
+# Tauri build artifacts
+src-tauri/gen/
+src-tauri/target/
+*.dmg
+*.app
+*.msi
+*.deb
+*.AppImage
+
+# Internal state / OMC / Codex governance
 .omc/
 .codex/
 .claude/local/
+*-todo.md
+pipeline-state.json
+*.state.json

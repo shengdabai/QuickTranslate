@@ -2,6 +2,12 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { load } from "@tauri-apps/plugin-store";
 
+interface Settings {
+  apiKey: string;
+  apiUrl: string;
+  model: string;
+}
+
 function TranslateView() {
   const [inputText, setInputText] = useState("");
   const [result, setResult] = useState("");
@@ -9,9 +15,23 @@ function TranslateView() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const settingsRef = useRef<Settings>({ apiKey: "", apiUrl: "", model: "" });
 
   useEffect(() => {
     inputRef.current?.focus();
+    // Load settings once on mount and cache in ref to avoid repeated disk I/O
+    (async () => {
+      try {
+        const store = await load("settings.json");
+        settingsRef.current = {
+          apiKey: ((await store.get<string>("apiKey")) ?? "").trim(),
+          apiUrl: ((await store.get<string>("apiUrl")) ?? "").trim(),
+          model: ((await store.get<string>("model")) ?? "").trim(),
+        };
+      } catch {
+        // Settings not yet saved; defaults remain empty strings
+      }
+    })();
   }, []);
 
   const handleTranslate = useCallback(async () => {
@@ -21,10 +41,7 @@ function TranslateView() {
     setResult("");
 
     try {
-      const store = await load("settings.json");
-      const apiKey = ((await store.get<string>("apiKey")) ?? "").trim();
-      const apiUrl = ((await store.get<string>("apiUrl")) ?? "").trim();
-      const model = ((await store.get<string>("model")) ?? "").trim();
+      const { apiKey, apiUrl, model } = settingsRef.current;
 
       const translated = await invoke<string>("translate", {
         text: inputText,
