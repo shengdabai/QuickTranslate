@@ -145,7 +145,7 @@ Released under the MIT License. See [LICENSE](LICENSE) for details.
 ### 前置要求
 
 - [Node.js](https://nodejs.org/) 18 及以上
-- [Rust](https://www.rust-lang.org/tools/install) 1.70 及以上（含 Cargo）
+- [Rust](https://www.rust-lang.org/tools/install) 1.90 及以上（含 Cargo）
 - [pnpm](https://pnpm.io/installation)
 - Tauri 平台依赖 — 见 [Tauri 前置要求](https://v2.tauri.app/start/prerequisites/)
 
