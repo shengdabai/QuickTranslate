@@ -1,29 +1,56 @@
 import { useState, useEffect } from "react";
 import { load } from "@tauri-apps/plugin-store";
+import { readSettings } from "../settings";
 
 function SettingsView() {
   const [apiKey, setApiKey] = useState("");
   const [apiUrl, setApiUrl] = useState("");
   const [model, setModel] = useState("");
   const [saved, setSaved] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    let active = true;
     (async () => {
-      const store = await load("settings.json");
-      setApiKey((await store.get<string>("apiKey")) ?? "");
-      setApiUrl((await store.get<string>("apiUrl")) ?? "");
-      setModel((await store.get<string>("model")) ?? "");
+      try {
+        const settings = await readSettings(await load("settings.json"));
+        if (!active) return;
+        setApiKey(settings.apiKey);
+        setApiUrl(settings.apiUrl);
+        setModel(settings.model);
+        setReady(true);
+      } catch {
+        if (active) setError("读取配置失败，请重新打开设置后重试");
+      }
     })();
+    return () => { active = false; };
   }, []);
 
+  useEffect(() => {
+    if (!saved) return;
+    const timer = setTimeout(() => setSaved(false), 1500);
+    return () => clearTimeout(timer);
+  }, [saved]);
+
   const handleSave = async () => {
-    const store = await load("settings.json");
-    await store.set("apiKey", apiKey);
-    await store.set("apiUrl", apiUrl);
-    await store.set("model", model);
-    await store.save();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1500);
+    if (!ready || saving) return;
+    setSaving(true);
+    setSaved(false);
+    setError("");
+    try {
+      const store = await load("settings.json");
+      await store.set("apiKey", apiKey);
+      await store.set("apiUrl", apiUrl);
+      await store.set("model", model);
+      await store.save();
+      setSaved(true);
+    } catch {
+      setError("保存配置失败，请重试");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -40,6 +67,7 @@ function SettingsView() {
             API KEY
           </label>
           <input
+            disabled={!ready}
             type="password"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
@@ -54,6 +82,7 @@ function SettingsView() {
             <span style={{ marginLeft: "6px", color: "rgba(255,255,255,0.2)", fontWeight: 400 }}>（可选）</span>
           </label>
           <input
+            disabled={!ready}
             type="text"
             value={apiUrl}
             onChange={(e) => setApiUrl(e.target.value)}
@@ -67,6 +96,7 @@ function SettingsView() {
             MODEL
           </label>
           <input
+            disabled={!ready}
             type="text"
             value={model}
             onChange={(e) => setModel(e.target.value)}
@@ -77,8 +107,10 @@ function SettingsView() {
       </div>
 
       <div className="mt-auto flex flex-col gap-2">
+        {error && <p role="alert" className="text-xs text-red-400">{error}</p>}
         <button
           onClick={handleSave}
+          disabled={!ready || saving}
           className="btn-glow w-full py-2.5 rounded-xl text-sm font-semibold text-white tracking-wide"
         >
           {saved ? "✓ 已保存" : "保存配置"}

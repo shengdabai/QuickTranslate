@@ -2,11 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { load } from "@tauri-apps/plugin-store";
 
-interface Settings {
-  apiKey: string;
-  apiUrl: string;
-  model: string;
-}
+import { readSettings } from "../settings";
 
 function TranslateView() {
   const [inputText, setInputText] = useState("");
@@ -15,24 +11,16 @@ function TranslateView() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const settingsRef = useRef<Settings>({ apiKey: "", apiUrl: "", model: "" });
 
   useEffect(() => {
     inputRef.current?.focus();
-    // Load settings once on mount and cache in ref to avoid repeated disk I/O
-    (async () => {
-      try {
-        const store = await load("settings.json");
-        settingsRef.current = {
-          apiKey: ((await store.get<string>("apiKey")) ?? "").trim(),
-          apiUrl: ((await store.get<string>("apiUrl")) ?? "").trim(),
-          model: ((await store.get<string>("model")) ?? "").trim(),
-        };
-      } catch {
-        // Settings not yet saved; defaults remain empty strings
-      }
-    })();
   }, []);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 1500);
+    return () => clearTimeout(timer);
+  }, [copied]);
 
   const handleTranslate = useCallback(async () => {
     if (!inputText.trim() || loading) return;
@@ -41,7 +29,7 @@ function TranslateView() {
     setResult("");
 
     try {
-      const { apiKey, apiUrl, model } = settingsRef.current;
+      const { apiKey, apiUrl, model } = await readSettings(await load("settings.json"));
 
       const translated = await invoke<string>("translate", {
         text: inputText,
@@ -69,9 +57,12 @@ function TranslateView() {
 
   const handleCopy = useCallback(async () => {
     if (!result) return;
-    await navigator.clipboard.writeText(result);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    try {
+      await navigator.clipboard.writeText(result);
+      setCopied(true);
+    } catch {
+      setError("复制失败，请检查剪贴板权限");
+    }
   }, [result]);
 
   return (
