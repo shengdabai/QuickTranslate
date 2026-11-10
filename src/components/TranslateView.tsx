@@ -29,7 +29,8 @@ function TranslateView() {
     setResult("");
 
     try {
-      const { apiKey, apiUrl, model } = await readSettings(await load("settings.json"));
+      const { apiKey, apiUrl, model } = await readSettings(await load("settings.json", { autoSave: false }),
+        () => invoke<string>("get_api_key"));
 
       const translated = await invoke<string>("translate", {
         text: inputText,

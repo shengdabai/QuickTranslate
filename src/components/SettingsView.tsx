@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { load } from "@tauri-apps/plugin-store";
-import { readSettings } from "../settings";
+import { invoke } from "@tauri-apps/api/core";
+import { readSettings, saveSettings } from "../settings";
 
 function SettingsView() {
   const [apiKey, setApiKey] = useState("");
@@ -15,7 +16,8 @@ function SettingsView() {
     let active = true;
     (async () => {
       try {
-        const settings = await readSettings(await load("settings.json"));
+        const settings = await readSettings(await load("settings.json", { autoSave: false }),
+          () => invoke<string>("get_api_key"));
         if (!active) return;
         setApiKey(settings.apiKey);
         setApiUrl(settings.apiUrl);
@@ -40,11 +42,9 @@ function SettingsView() {
     setSaved(false);
     setError("");
     try {
-      const store = await load("settings.json");
-      await store.set("apiKey", apiKey);
-      await store.set("apiUrl", apiUrl);
-      await store.set("model", model);
-      await store.save();
+      const store = await load("settings.json", { autoSave: false });
+      await saveSettings(store, { apiKey, apiUrl, model },
+        (key) => invoke<void>("set_api_key", { apiKey: key }));
       setSaved(true);
     } catch {
       setError("保存配置失败，请重试");
