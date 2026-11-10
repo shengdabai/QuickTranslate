@@ -1,4 +1,5 @@
 mod translate;
+mod credentials;
 
 use tauri::{
     menu::{MenuBuilder, MenuItemBuilder},
@@ -72,7 +73,7 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![translate::translate])
+        .invoke_handler(tauri::generate_handler![translate::translate, credentials::get_api_key, credentials::set_api_key])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
